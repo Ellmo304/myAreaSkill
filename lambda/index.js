@@ -1,288 +1,230 @@
 var Alexa = require('alexa-sdk');
-var http = require('http');
+
+const OpearloAnalytics = require('opearlo-analytics');
+
+const APP_ID = 'amzn1.ask.skill.4af154b7-b157-499d-aa15-16f4e2fb197d';
 
 var attractions = require('./data/attractions');
 var topFive = require('./data/topFive');
 
 var states = {
-    SEARCHMODE: '_SEARCHMODE',
-    TOPFIVE: '_TOPFIVE',
+  SEARCHMODE: '_SEARCHMODE',
+  TOPFIVE: '_TOPFIVE',
 };
 
-var location = "Harrow";
+var location = 'Harrow';
 
-var numberOfResults = 3;
+var welcomeMessage = `Guide to ${location}. You can ask me for an attraction, an overview of the area, or say help. What will it be?`;
 
-var APIKey = "4844d21f760b47359945751b9f875877";
+var welcomeReprompt = 'You can ask me for an attraction, an overview of the area, or say help. What will it be?';
 
-var welcomeMessage = location + " Guide. You can ask me for an attraction, the local news, or  say help. What will it be?";
+var HelpMessage = `Here are some things you can say: Give me an attraction. Tell me about ${location}. Tell me the top five things to do in ${location}. What would you like to do?`;
 
-var welcomeRepromt = "You can ask me for an attraction, the local news, or  say help. What will it be?";
+var moreInformation = 'See your  Alexa app for  more  information.';
 
-var locationOverview = "Harrow is a large suburban town in the London Borough of Harrow, northwest London, England. It is centred 10.5 miles (16.9 km) northwest of Charing Cross. Harrow-on-the-Hill includes the conservation area with a high proportion of listed buildings with a residential and institutional array of Georgian architecture and a few 17th century examples. Harrow gives its initial letters to a wider postcode area. The administrative offices of the borough are in the town which currently is made up of the Greenhill, Headstone South and West Harrow electoral wards; these had a population of 33,928 in the 2011 census. Harrow was a municipal borough of Middlesex before its inclusion in Greater London in 1965. Harrow is home to a large Westminster polytechnic campus and its oldest secondary schools are Harrow School and Harrow High School.";
+var tryAgainMessage = 'please try again.';
 
-var HelpMessage = "Here are some things you  can say: Give me an attraction. Tell me about " + location + ". Tell me the top five things to do. Tell me the local news.  What would you like to do?";
+var noAttractionErrorMessage = `There was an error finding this attraction, ${tryAgainMessage}`;
 
-var moreInformation = "See your  Alexa app for  more  information."
+var topFiveMoreInfo = ' You can tell me a number for more information. For example open number one.';
 
-var tryAgainMessage = "please try again."
+var getMoreInfoRepromtMessage = 'What number attraction would you like to hear about?';
 
-var noAttractionErrorMessage = "There was an error finding this attraction, " + tryAgainMessage;
+var getMoreInfoMessage = `OK, ${getMoreInfoRepromtMessage}`;
 
-var topFiveMoreInfo = " You can tell me a number for more information. For example open number one.";
+// var goodbyeMessage = `OK, have a nice time in ${location}.`;
 
-var getMoreInfoRepromtMessage = "What number attraction would you like to hear about?";
+var hearMoreMessage = `Would you like to hear about another top thing that you can do in ${location}?`;
 
-var getMoreInfoMessage = "OK, " + getMoreInfoRepromtMessage;
+var newline = '\n';
 
-var goodbyeMessage = "OK, have a nice time in " + location + ".";
-
-var newsIntroMessage = "These are the " + numberOfResults + " most recent " + location + " headlines, you can read more on your Alexa app. ";
-
-var hearMoreMessage = "Would you like to hear about another top thing that you can do in " + location +"?";
-
-var newline = "\n";
-
-var output = "";
+var output = '';
 
 var alexa;
 
 
-var topFiveIntro = "Here are the top five things to  do in " + location + ".";
+var topFiveIntro = `Here are the top five things to do in ${location}.`;
 
 var newSessionHandlers = {
-    'LaunchRequest': function () {
-        this.handler.state = states.SEARCHMODE;
-        output = welcomeMessage;
-        this.emit(':ask', output, welcomeRepromt);
-    },
-    'getAttractionIntent': function () {
-        this.handler.state = states.SEARCHMODE;
-        this.emitWithState('getAttractionIntent');
-    },
-    'getTopFiveIntent': function(){
-        this.handler.state = states.SEARCHMODE;
-        this.emitWithState('getTopFiveIntent');
-    },
-    'AMAZON.StopIntent': function () {
-        this.emit(':tell', goodbyeMessage);
-    },
-    'AMAZON.CancelIntent': function () {
-        // Use this function to clear up and save any data needed between sessions
-        this.emit(":tell", goodbyeMessage);
-    },
-    'SessionEndedRequest': function () {
-        // Use this function to clear up and save any data needed between sessions
-        this.emit('AMAZON.StopIntent');
-    },
-    'Unhandled': function () {
-        output = HelpMessage;
-        this.emit(':ask', output, welcomeRepromt);
-    },
+  'LaunchRequest': function () {
+    this.handler.state = states.SEARCHMODE;
+    output = welcomeMessage;
+    this.emit(':ask', output, welcomeReprompt);
+  },
+  'getAttractionIntent': function () {
+    this.handler.state = states.SEARCHMODE;
+    this.emitWithState('getAttractionIntent');
+  },
+  'getTopFiveIntent': function () {
+    this.handler.state = states.SEARCHMODE;
+    this.emitWithState('getTopFiveIntent');
+  },
+  'AMAZON.StopIntent': function () {
+    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', (result)=> {
+      this.emit(':tell', 'Thanks for using my area guide. Goodbye!');
+    });
+  },
+  'AMAZON.CancelIntent': function () {
+    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', (result)=> {
+      this.emit(':tell', 'Thanks for using my area guide. Goodbye!');
+    });
+  },
+  'SessionEndedRequest': function () {
+    // Use this function to clear up and save any data needed between sessions
+    this.emit('AMAZON.StopIntent');
+  },
+  'Unhandled': function () {
+    output = HelpMessage;
+    this.emit(':ask', output, welcomeReprompt);
+  },
 };
 
 var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
-    'getOverview': function () {
-        output = locationOverview;
-        this.emit(':askWithCard', output, location, locationOverview);
-    },
-    'getAttractionIntent': function () {
-        var cardTitle = location;
-        var cardContent = "";
+  'getOverview': function () {
+    OpearloAnalytics.getVoiceContent('fNhbsp0HjDMH7AcLOsVnB0HvJiF3', 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', 'my-area', 'harrow-overview', (result) => {
+      console.log('RESULT', result);
+      this.emit(':ask', result, welcomeReprompt);
+    });
+      // output = locationOverview;
+      // this.emit(':askWithCard', output, location, locationOverview);
+  },
+  'getAttractionIntent': function () {
+    OpearloAnalytics.getVoiceContent('fNhbsp0HjDMH7AcLOsVnB0HvJiF3', 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', 'my-area', 'harrow-attractions', (result) => {
+      console.log('RESULT', result);
+      this.emit(':ask', result, welcomeReprompt);
+    });
+  },
+  'getTopFiveIntent': function () {
+    output = topFiveIntro;
+    var cardTitle = `Top Five Things To See in ${location}`;
 
-        var attraction = attractions[Math.floor(Math.random() * attractions.length)];
-        if (attraction) {
-            output = attraction.name + " " + attraction.content + newline + moreInformation;
-            cardTitle = attraction.name;
-            cardContent = attraction.content + newline + attraction.contact;
-
-            this.emit(':tellWithCard', output, cardTitle, cardContent);
-        } else {
-            this.emit(':ask', noAttractionErrorMessage, tryAgainMessage);
-        }
-    },
-    'getTopFiveIntent': function () {
-        output = topFiveIntro;
-        var cardTitle = "Top Five Things To See in " + location;
-
-        for (var counter = topFive.length - 1; counter >= 0; counter--) {
-            output += " Number " + topFive[counter].number + ": " + topFive[counter].caption + newline;
-        }
-        output += topFiveMoreInfo;
-        this.handler.state = states.TOPFIVE;
-        this.emit(':askWithCard', output, topFiveMoreInfo, cardTitle, output);
-    },
-    'AMAZON.YesIntent': function () {
-        output = HelpMessage;
-        this.emit(':ask', output, HelpMessage);
-    },
-    'AMAZON.NoIntent': function () {
-        output = HelpMessage;
-        this.emit(':ask', HelpMessage, HelpMessage);
-    },
-    'AMAZON.StopIntent': function () {
-        this.emit(':tell', goodbyeMessage);
-    },
-    'AMAZON.HelpIntent': function () {
-        output = HelpMessage;
-        this.emit(':ask', output, HelpMessage);
-    },
-    'getNewsIntent': function () {
-        httpGet(location, function (response) {
-
-            // Parse the response into a JSON object ready to be formatted.
-            var responseData = JSON.parse(response);
-            var cardContent = "Data provided by New York Times\n\n";
-
-            // Check if we have correct data, If not create an error speech out to try again.
-            if (responseData == null) {
-                output = "There was a problem with getting data please try again";
-            }
-            else {
-                output = newsIntroMessage;
-
-                // If we have data.
-                for (var i = 0; i < responseData.response.docs.length; i++) {
-
-                    if (i < numberOfResults) {
-                        // Get the name and description JSON structure.
-                        var headline = responseData.response.docs[i].headline.main;
-                        var index = i + 1;
-
-                        output += " Headline " + index + ": " + headline + ";";
-
-                        cardContent += " Headline " + index + ".\n";
-                        cardContent += headline + ".\n\n";
-                    }
-                }
-
-                output += " See your Alexa app for more information.";
-            }
-
-            var cardTitle = location + " News";
-
-            alexa.emit(':tellWithCard', output, cardTitle, cardContent);
-        });
-    },
-
-    'AMAZON.RepeatIntent': function () {
-        this.emit(':ask', output, HelpMessage);
-    },
-    'AMAZON.CancelIntent': function () {
-        // Use this function to clear up and save any data needed between sessions
-        this.emit(":tell", goodbyeMessage);
-    },
-    'SessionEndedRequest': function () {
-        // Use this function to clear up and save any data needed between sessions
-        this.emit('AMAZON.StopIntent');
-    },
-    'Unhandled': function () {
-        output = HelpMessage;
-        this.emit(':ask', output, welcomeRepromt);
+    for (var counter = topFive.length - 1; counter >= 0; counter--) {
+      output += ` Number ${topFive[counter].number} : ${topFive[counter].caption} + ${newline}`;
     }
+    output += topFiveMoreInfo;
+    this.handler.state = states.TOPFIVE;
+    this.emit(':askWithCard', output, topFiveMoreInfo, cardTitle, output);
+  },
+  'AMAZON.YesIntent': function () {
+    output = HelpMessage;
+    this.emit(':ask', output, HelpMessage);
+  },
+  'AMAZON.NoIntent': function () {
+    output = HelpMessage;
+    this.emit(':ask', HelpMessage, HelpMessage);
+  },
+  'AMAZON.StopIntent': function () {
+    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', (result)=> {
+      this.emit(':tell', 'Thanks for using my area guide. Goodbye!');
+    });
+  },
+  'AMAZON.HelpIntent': function () {
+    output = HelpMessage;
+    this.emit(':ask', output, HelpMessage);
+  },
+  'AMAZON.RepeatIntent': function () {
+    this.emit(':ask', output, HelpMessage);
+  },
+  'AMAZON.CancelIntent': function () {
+    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', (result)=> {
+      this.emit(':tell', 'Thanks for using my area guide. Goodbye!');
+    });
+  },
+  'SessionEndedRequest': function () {
+    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', (result)=> {
+      this.emit(':tell', 'Thanks for using my area guide. Goodbye!');
+    });
+  },
+  'Unhandled': function () {
+    output = HelpMessage;
+    this.emit(':ask', output, welcomeReprompt);
+  },
 });
 
 var topFiveHandlers = Alexa.CreateStateHandler(states.TOPFIVE, {
-    'getAttractionIntent': function () {
-        this.handler.state = states.SEARCHMODE;
-        this.emitWithState('getAttractionIntent');
-    },
-    'getOverview': function () {
-        this.handler.state = states.SEARCHMODE;
-        this.emitWithState('getOverview');
-    },
-    'getTopFiveIntent': function () {
-        this.handler.state = states.SEARCHMODE;
-        this.emitWithState('getTopFiveIntent');
-    },
-    'AMAZON.HelpIntent': function () {
-        output = HelpMessage;
-        this.emit(':ask', output, HelpMessage);
-    },
+  'getAttractionIntent': function () {
+    this.handler.state = states.SEARCHMODE;
+    this.emitWithState('getAttractionIntent');
+  },
+  'getOverview': function () {
+    this.handler.state = states.SEARCHMODE;
+    this.emitWithState('getOverview');
+  },
+  'getTopFiveIntent': function () {
+    this.handler.state = states.SEARCHMODE;
+    this.emitWithState('getTopFiveIntent');
+  },
+  'AMAZON.HelpIntent': function () {
+    output = HelpMessage;
+    this.emit(':ask', output, HelpMessage);
+  },
 
-    'getMoreInfoIntent': function () {
-        var slotValue = this.event.request.intent.slots.attraction.value;
-        var index = parseInt(slotValue) - 1;
+  'getMoreInfoIntent': function () {
+    var slotValue = this.event.request.intent.slots.attraction.value;
+    var index = parseInt(slotValue) - 1;
 
-        var selectedAttraction = topFive[index];
-        if (selectedAttraction) {
+    var selectedAttraction = topFive[index];
+    if (selectedAttraction) {
 
-            output = selectedAttraction.caption + ". " + selectedAttraction.more + ". " + hearMoreMessage;
-            var cardTitle = selectedAttraction.name;
-            var cardContent = selectedAttraction.caption + newline + newline + selectedAttraction.more + newline + newline + selectedAttraction.location + newline + newline + selectedAttraction.contact;
+      output = `${selectedAttraction.caption}. ${selectedAttraction.more}. ${hearMoreMessage}`;
+      var cardTitle = selectedAttraction.name;
+      var cardContent = selectedAttraction.caption + newline + newline + selectedAttraction.more + newline + newline + selectedAttraction.location + newline + newline + selectedAttraction.contact;
 
-            this.emit(':askWithCard', output, hearMoreMessage, cardTitle, cardContent);
-        } else {
-            this.emit(':ask', noAttractionErrorMessage);
-        }
-    },
-
-    'AMAZON.YesIntent': function () {
-        output = getMoreInfoMessage;
-        alexa.emit(':ask', output, getMoreInfoRepromtMessage);
-    },
-    'AMAZON.NoIntent': function () {
-        output = goodbyeMessage;
-        alexa.emit(':tell', output);
-    },
-    'AMAZON.StopIntent': function () {
-        this.emit(':tell', goodbyeMessage);
-    },
-    'AMAZON.RepeatIntent': function () {
-        this.emit(':ask', output, HelpMessage);
-    },
-    'AMAZON.CancelIntent': function () {
-        // Use this function to clear up and save any data needed between sessions
-        this.emit(":tell", goodbyeMessage);
-    },
-    'SessionEndedRequest': function () {
-        // Use this function to clear up and save any data needed between sessions
-    },
-
-    'Unhandled': function () {
-        output = HelpMessage;
-        this.emit(':ask', output, welcomeRepromt);
+      this.emit(':askWithCard', output, hearMoreMessage, cardTitle, cardContent);
     }
+    else {
+      this.emit(':ask', noAttractionErrorMessage);
+    }
+  },
+
+  'AMAZON.YesIntent': function () {
+    output = getMoreInfoMessage;
+    alexa.emit(':ask', output, getMoreInfoRepromtMessage);
+  },
+  'AMAZON.NoIntent': function () {
+    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', (result)=> {
+      this.emit(':tell', 'Thanks for using my area guide. Goodbye!');
+    });
+  },
+  'AMAZON.StopIntent': function () {
+    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', (result)=> {
+      this.emit(':tell', 'Thanks for using my area guide. Goodbye!');
+    });
+  },
+  'AMAZON.RepeatIntent': function () {
+    this.emit(':ask', output, HelpMessage);
+  },
+  'AMAZON.CancelIntent': function () {
+    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', (result)=> {
+      this.emit(':tell', 'Thanks for using my area guide. Goodbye!');
+    });
+  },
+  'SessionEndedRequest': function () {
+    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', (result)=> {
+      this.emit(':tell', 'Thanks for using my area guide. Goodbye!');
+    });
+  },
+
+  'Unhandled': function () {
+    output = HelpMessage;
+    this.emit(':ask', output, welcomeReprompt);
+  },
 });
 
 exports.handler = function (event, context, callback) {
-    alexa = Alexa.handler(event, context);
-    alexa.registerHandlers(newSessionHandlers, startSearchHandlers, topFiveHandlers);
-    alexa.execute();
+  alexa = Alexa.handler(event, context);
+  alexa.registerHandlers(newSessionHandlers, startSearchHandlers, topFiveHandlers);
+  if (event.session.new) {
+    OpearloAnalytics.initializeAnalytics('fNhbsp0HjDMH7AcLOsVnB0HvJiF3', 'my-area', event.session);
+  }
+  if (event.request.type === 'IntentRequest') {
+    OpearloAnalytics.registerVoiceEvent(event.session.user.userId, 'IntentRequest', event.request.intent);
+  }
+  alexa.execute();
 };
 
-// Create a web request and handle the response.
-function httpGet(query, callback) {
-  console.log("/n QUERY: "+query);
-
-    var options = {
-      //http://api.nytimes.com/svc/search/v2/articlesearch.json?q=seattle&sort=newest&api-key=
-        host: 'api.nytimes.com',
-        path: '/svc/search/v2/articlesearch.json?q=' + query + '&sort=newest&api-key=' + APIKey,
-        method: 'GET'
-    };
-
-    var req = http.request(options, (res) => {
-
-        var body = '';
-
-        res.on('data', (d) => {
-            body += d;
-        });
-
-        res.on('end', function () {
-            callback(body);
-        });
-
-    });
-    req.end();
-
-    req.on('error', (e) => {
-        console.error(e);
-    });
-}
 
 String.prototype.trunc =
-      function (n) {
-          return this.substr(0, n - 1) + (this.length > n ? '&hellip;' : '');
-      };
+  function (n) {
+    return this.substr(0, n - 1) + (this.length > n ? '&hellip;' : '');
+  };

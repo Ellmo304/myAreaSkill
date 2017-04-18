@@ -1,0 +1,48 @@
+getOverview more information about harrow
+getOverview what's it like in harrow
+getOverview tell me more about harrow
+getOverview tell me some facts about harrow
+getOverview facts about harrow
+getOverview overview of harrow
+getOverview harrow facts
+getOverview harrow overview
+getOverview overview
+
+getTopFiveIntent tell me the top five things
+getTopFiveIntent tell me the top five things in harrow
+getTopFiveIntent top five things to do
+getTopFiveIntent top five things to do in harrow
+getTopFiveIntent give me the top five
+getTopFiveIntent give me the top five in harrow
+getTopFiveIntent give me the top five for harrow
+getTopFiveIntent the top five
+getTopFiveIntent the top five in harrow
+getTopFiveIntent top five
+getTopFiveIntent top five for harrow
+getTopFiveIntent top five in harrow
+getTopFiveIntent the top five things to do
+getTopFiveIntent the top five things to do in harrow
+
+getAttractionIntent tell me a good attraction
+getAttractionIntent tell me a good attraction in harrow
+getAttractionIntent where should I go
+getAttractionIntent where should I go in harrow
+getAttractionIntent give me an attraction
+getAttractionIntent give me a harrow attraction
+getAttractionIntent give me an attraction in harrow
+getAttractionIntent an attraction
+getAttractionIntent an attraction in harrow
+getAttractionIntent attractions
+getAttractionIntent attractions in harrow
+
+getMoreInfoIntent tell me more about number {attraction}
+getMoreInfoIntent what is number {attraction}
+getMoreInfoIntent more about number {attraction}
+getMoreInfoIntent number {attraction}
+getMoreInfoIntent open number {attraction}
+getMoreInfoIntent {attraction}
+
+AMAZON.StopIntent stop
+AMAZON.StopIntent off
+AMAZON.StopIntent goodbye
+AMAZON.StopIntent shut up
