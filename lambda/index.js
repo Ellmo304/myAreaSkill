@@ -4,7 +4,13 @@ const OpearloAnalytics = require('opearlo-analytics');
 
 const APP_ID = 'amzn1.ask.skill.4af154b7-b157-499d-aa15-16f4e2fb197d';
 
-var attractions = require('./data/attractions');
+const opearloUserId = 'kJnUOYznWOZmmLEv4aUesaMrOg63';
+// const opearloUserId = 'fNhbsp0HjDMH7AcLOsVnB0HvJiF3';
+const opearloApiKey = 'RrTGUvJLyz3w5yR8zaC5p5V7Q83VCnfv6M8fnrCE';
+// const opearloApiKey = 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa';
+const voiceAppName = 'my-area';
+
+// var attractions = require('./data/attractions');
 var topFive = require('./data/topFive');
 
 var states = {
@@ -20,7 +26,7 @@ var welcomeReprompt = 'You can ask me for an attraction, an overview of the area
 
 var HelpMessage = `Here are some things you can say: Give me an attraction. Tell me about ${location}. Tell me the top five things to do in ${location}. What would you like to do?`;
 
-var moreInformation = 'See your  Alexa app for  more  information.';
+// var moreInformation = 'See your  Alexa app for  more  information.';
 
 var tryAgainMessage = 'please try again.';
 
@@ -60,12 +66,12 @@ var newSessionHandlers = {
     this.emitWithState('getTopFiveIntent');
   },
   'AMAZON.StopIntent': function () {
-    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', (result)=> {
+    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, opearloApiKey, (result) => {
       this.emit(':tell', 'Thanks for using my area guide. Goodbye!');
     });
   },
   'AMAZON.CancelIntent': function () {
-    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', (result)=> {
+    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, opearloApiKey, (result) => {
       this.emit(':tell', 'Thanks for using my area guide. Goodbye!');
     });
   },
@@ -81,7 +87,7 @@ var newSessionHandlers = {
 
 var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
   'getOverview': function () {
-    OpearloAnalytics.getVoiceContent('fNhbsp0HjDMH7AcLOsVnB0HvJiF3', 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', 'my-area', 'harrow-overview', (result) => {
+    OpearloAnalytics.getVoiceContent(opearloUserId, voiceAppName, opearloApiKey, 'harrow-test', (result) => {
       console.log('RESULT', result);
       this.emit(':ask', result, welcomeReprompt);
     });
@@ -89,7 +95,7 @@ var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
       // this.emit(':askWithCard', output, location, locationOverview);
   },
   'getAttractionIntent': function () {
-    OpearloAnalytics.getVoiceContent('fNhbsp0HjDMH7AcLOsVnB0HvJiF3', 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', 'my-area', 'harrow-attractions', (result) => {
+    OpearloAnalytics.getVoiceContent(opearloUserId, voiceAppName, opearloApiKey, 'harrow-attractions', (result) => {
       console.log('RESULT', result);
       this.emit(':ask', result, welcomeReprompt);
     });
@@ -114,7 +120,7 @@ var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
     this.emit(':ask', HelpMessage, HelpMessage);
   },
   'AMAZON.StopIntent': function () {
-    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', (result)=> {
+    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, opearloApiKey, (result) => {
       this.emit(':tell', 'Thanks for using my area guide. Goodbye!');
     });
   },
@@ -126,12 +132,12 @@ var startSearchHandlers = Alexa.CreateStateHandler(states.SEARCHMODE, {
     this.emit(':ask', output, HelpMessage);
   },
   'AMAZON.CancelIntent': function () {
-    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', (result)=> {
+    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, opearloApiKey, (result) => {
       this.emit(':tell', 'Thanks for using my area guide. Goodbye!');
     });
   },
   'SessionEndedRequest': function () {
-    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', (result)=> {
+    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, opearloApiKey, (result) => {
       this.emit(':tell', 'Thanks for using my area guide. Goodbye!');
     });
   },
@@ -182,12 +188,12 @@ var topFiveHandlers = Alexa.CreateStateHandler(states.TOPFIVE, {
     alexa.emit(':ask', output, getMoreInfoRepromtMessage);
   },
   'AMAZON.NoIntent': function () {
-    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', (result)=> {
+    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, opearloApiKey, (result) => {
       this.emit(':tell', 'Thanks for using my area guide. Goodbye!');
     });
   },
   'AMAZON.StopIntent': function () {
-    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', (result)=> {
+    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, opearloApiKey, (result) => {
       this.emit(':tell', 'Thanks for using my area guide. Goodbye!');
     });
   },
@@ -195,12 +201,12 @@ var topFiveHandlers = Alexa.CreateStateHandler(states.TOPFIVE, {
     this.emit(':ask', output, HelpMessage);
   },
   'AMAZON.CancelIntent': function () {
-    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', (result)=> {
+    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, opearloApiKey, (result) => {
       this.emit(':tell', 'Thanks for using my area guide. Goodbye!');
     });
   },
   'SessionEndedRequest': function () {
-    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, 'Zs0SGzK38471yJ55tWPb75SQhOBYEJAj19kFBRQa', (result)=> {
+    OpearloAnalytics.recordAnalytics(this.event.session.user.userId, opearloApiKey, (result) => {
       this.emit(':tell', 'Thanks for using my area guide. Goodbye!');
     });
   },
@@ -215,7 +221,7 @@ exports.handler = function (event, context, callback) {
   alexa = Alexa.handler(event, context);
   alexa.registerHandlers(newSessionHandlers, startSearchHandlers, topFiveHandlers);
   if (event.session.new) {
-    OpearloAnalytics.initializeAnalytics('fNhbsp0HjDMH7AcLOsVnB0HvJiF3', 'my-area', event.session);
+    OpearloAnalytics.initializeAnalytics(opearloUserId, voiceAppName, event.session);
   }
   if (event.request.type === 'IntentRequest') {
     OpearloAnalytics.registerVoiceEvent(event.session.user.userId, 'IntentRequest', event.request.intent);

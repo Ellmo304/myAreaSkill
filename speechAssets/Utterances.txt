@@ -7,6 +7,9 @@ getOverview overview of harrow
 getOverview harrow facts
 getOverview harrow overview
 getOverview overview
+getOverview an overview
+getOverview give me an overview
+getOverview give me an overview of harrow
 
 getTopFiveIntent tell me the top five things
 getTopFiveIntent tell me the top five things in harrow
